@@ -1,4 +1,4 @@
-# Ignore output and data directories
 /output/
+!/output/exemple_output/results.json
 /data/
 .DS_Store
