@@ -1,4 +1,3 @@
-/output/
-!/output/exemple_output/results.json
+/output/exemple_output/dashboard/
 /data/
 .DS_Store
