@@ -1,0 +1,146 @@
+Prompt for LLM OCR
+
+Context:
+You are an expert in document processing and HTR-based structured data extraction. Your task is to extract structured information from a scanned legal document while strictly following a predefined JSON schema.
+
+Objective:
+Extract relevant text fields, checkbox selections, and structured data from the given document image. Ignore occasional extra stamps, handwritten notes, or artifacts that are not part of the predefined fields.
+
+Style & Tone:
+
+No text outside the predefined format should be inserted. No modification of style and tone of original text should be done.
+
+Task:
+
+Extract text and checkbox values according to the schema provided.
+
+Preserve the document’s structure and use the correct variable names.
+
+If field is empty, leave it blank ("null"). 
+
+If a field is unclear, leave it blank ("null").
+
+Provide a confidence score (0-1) in the metadata field based on extraction accuracy, and your commentary if the score is low.
+
+Action:
+Return a structured JSON following this schema:
+
+```json
+{
+  "header": {
+    "title": "null"
+  },
+
+  "syndicat_champ": {
+    "addresse_info": "null",
+    "contacte": {
+      "matricule_confédéral": "null",
+      "tel": "null"
+    },
+    "correspondant_dossier": {
+      "nom": "null",
+      "address": "null",
+      "tel": "null"
+    }
+  },
+
+  "objet_litige": {
+    "sujet": "null",
+    "dossier_victime_case": {
+      "existe": "oui | non | null",
+      "numero_dossier": "null"
+    }
+  },
+
+  "parties_procès_champ": {
+    "coté_cfdt": {
+      "syndicate_case": "oui | non | null",
+      "militant_case": "oui | non | null",
+      "nom_mandat_militant": "null",
+      "autres_parties": "null",
+      "adversaire": "null",
+      "initiative_case": "CFDT | Adversaire | null",
+      "défense_CFGT_case": "Avocat | Défenseur syndical | null",
+      "nom": "null",
+      "adresse": "null",
+      "Tél": "null"
+    }
+  },
+
+  "décisions_antérieures_champ": {
+    "décisions_patronales": "null",
+    "décisions_administratives": "null",
+    "jugements": "null",
+    "tribunaux": "null"
+  },
+
+  "entreprise_champ": {
+    "nom": "null",
+    "nbre_de_salariés": "null",
+    "nbre_d'établissements": "null",
+    "concerned_establishment": {
+      "nom": "null",
+      "nbre_de_salariés": "null",
+      "addresse": "null",
+      "activité": "null",
+      "ape_code": "null",
+      "date_implantation": "null",
+      "nbre_adhérents":"null",
+      "existence_case": {
+        "DS":"True | False | null",
+        "DP":"True | False | null",
+        "CE":"True | False | null"
+      },
+      "election_results_en pourcents": {
+        "CFDT": "null",
+        "CGT": "null",
+        "FO": "null",
+        "CFTC": "null",
+        "CGC": "null",
+        "DIV": "null"
+      }
+    }
+  },
+
+  "partie_réservée_champ": {
+    "avis_region": "null",
+    "avis_fédération": "null",
+    "avis_du_service": "null",
+    "décision_CNAS_case": {
+      "date": "null",
+      "droit_syndical": "True | False",
+      "fonds_tactique": "True | False",
+      "fonds_solidarité": "True | False",
+      "rejet": "True | False",
+      "sans_suite": "True | False"
+    }
+  },
+
+  "metadata": {
+    "document_type": "",
+    "confidence_score": "",
+    "confidence_explanation":"null"
+  }
+}
+```
+
+Result Format:
+
+Output must be in structured valid JSON format.
+
+Do not add any explanations or formatting beyond the required JSON.
+
+Key Considerations:
+
+Text may be misrecognized; apply OCR post-processing when needed. If not sure — leave it as “null”.
+
+Checkbox selections should be correctly detected. To help you do it, I provided options via '|' symbols as in “True | False”. 
+
+Ignore any handwritten marks, stamps, or stray elements that do not fit the predefined fields.
+
+Confidence Estimation:
+At the end, populate the “metadata” field with a "confidence_score", estimating how reliably the document was transcribed.
+
+Here’s the document :
+
+document type 11

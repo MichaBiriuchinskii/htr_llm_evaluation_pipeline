@@ -1,0 +1,67 @@
+{
+  "header": {
+    "title": "FORMULAIRE DE DEMANDE DE SUBVENTION"
+  },
+  "organisation": {
+    "nom": "Association Culturelle des Artisans",
+    "addresse_info": "14, Rue des Metiers 75003 PARIS",
+    "contacte": {
+      "identifiant": "AC75003",
+      "tel": "01-42-88-63-32"
+    },
+    "responsable": {
+      "nom": "Marie DUPORT",
+      "fonction": "Présidente",
+      "tel": "06-78-45-12-98"
+    }
+  },
+  "projet": {
+    "titre": "Festival des Métiers d'Art",
+    "description": "Exposition et ateliers de démonstration des métiers d'art traditionnelles",
+    "public_cible": {
+      "age": "tout public",
+      "nombre_estime": "1500"
+    }
+  },
+  "financement": {
+    "montant_demande": "8500",
+    "cout_total": "12800",
+    "autres_financements": [
+      {
+        "source": "Mairie de Paris",
+        "montant": "2500",
+        "statut": "accordé"
+      },
+      {
+        "source": "Sponsors privés",
+        "montant": "1800",
+        "statut": "en cours"
+      }
+    ]
+  },
+  "planning": {
+    "date_debut": "15/05/2023",
+    "date_fin": "20/05/2023",
+    "lieu": "Espace Culturel Saint-Martin, Paris"
+  },
+  "documents_annexes": {
+    "budget_detaille": "oui",
+    "statuts_association": true,
+    "rapport_activite": true,
+    "devis": true
+  },
+  "cadre_reserve": {
+    "numero_dossier": "SUB-2023-0458",
+    "date_reception": "12/01/2023",
+    "avis_commission": "Favorable sous réserve de présentation des devis définitifs",
+    "montant_accorde": "7500",
+    "date_decision": "28/02/2023"
+  },
+  "metadata": {
+    "document_type": "Formulaire de demande de subvention",
+    "version": "2023-A",
+    "pages": "4",
+    "confidence_score": 0.92,
+    "confidence_explanation": "Quelques incertitudes sur les chiffres et certains noms propres. Le document était bien structuré mais certaines parties manuscrites étaient difficiles à déchiffrer."
+  }
+}
