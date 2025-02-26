@@ -1,4 +1,4 @@
 # Ignore output and data directories
 /output/
 /data/
-DS_Store
+.DS_Store
