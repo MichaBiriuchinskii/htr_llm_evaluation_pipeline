@@ -10,7 +10,11 @@ This system evaluates and visualizes the accuracy of HTR (Handwritten Text Recog
 
 ## Installation
 
-1. Save the Python script to a file named `htr_evaluation.py`
+1. Créer et activer l'environnement virtuel.
+```python
+python -m venv htr_llm_env
+source bin/activate/htr_llm_env
+```
 
 2. Install required Python packages:
 ```bash
