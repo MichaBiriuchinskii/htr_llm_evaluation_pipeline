@@ -538,8 +538,8 @@ def main():
     parser = argparse.ArgumentParser(description='Evaluate HTR document against gold standard.')
     parser.add_argument('gold_path', help='Path to the gold standard JSON file')
     parser.add_argument('pred_path', help='Path to the predicted JSON file')
-    parser.add_argument('--output', help='Path to save the evaluation results', default='/output/evaluation_results.json')
-    parser.add_argument('--dashboard', help='Path to save the dashboard files', default='/output/dashboard')
+    parser.add_argument('--output', help='Path to save the evaluation results', default='./output/evaluation_results.json')
+    parser.add_argument('--dashboard', help='Path to save the dashboard files', default='./output/dashboard')
     parser.add_argument('--serve', action='store_true', help='Serve the dashboard using a simple HTTP server')
     
     args = parser.parse_args()

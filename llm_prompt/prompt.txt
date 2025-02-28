@@ -28,27 +28,28 @@ Return a structured JSON following this schema:
 ```json
 {
   "header": {
-    "title": "null"
+    "title": null
   },
 
   "syndicat_champ": {
-    "addresse_info": "null",
+    "nom":null,
+    "addresse_info": null,
     "contacte": {
-      "matricule_confédéral": "null",
-      "tel": "null"
+      "matricule_confédéral": null,
+      "tel": null
     },
     "correspondant_dossier": {
-      "nom": "null",
-      "address": "null",
-      "tel": "null"
+      "nom": null,
+      "address": null,
+      "tel": null
     }
   },
 
   "objet_litige": {
-    "sujet": "null",
+    "sujet": null,
     "dossier_victime_case": {
       "existe": "oui | non | null",
-      "numero_dossier": "null"
+      "numero_dossier": null
     }
   },
 
@@ -56,58 +57,58 @@ Return a structured JSON following this schema:
     "coté_cfdt": {
       "syndicate_case": "oui | non | null",
       "militant_case": "oui | non | null",
-      "nom_mandat_militant": "null",
-      "autres_parties": "null",
-      "adversaire": "null",
+      "nom_mandat_militant": null,
+      "autres_parties": null,
+      "adversaire": null,
       "initiative_case": "CFDT | Adversaire | null",
       "défense_CFGT_case": "Avocat | Défenseur syndical | null",
-      "nom": "null",
-      "adresse": "null",
-      "Tél": "null"
+      "nom": null,
+      "adresse": null,
+      "Tél": null
     }
   },
 
   "décisions_antérieures_champ": {
-    "décisions_patronales": "null",
-    "décisions_administratives": "null",
-    "jugements": "null",
-    "tribunaux": "null"
+    "décisions_patronales": null,
+    "décisions_administratives": null,
+    "jugements": null,
+    "tribunaux": null
   },
 
   "entreprise_champ": {
-    "nom": "null",
-    "nbre_de_salariés": "null",
-    "nbre_d'établissements": "null",
+    "nom": null,
+    "nbre_de_salariés": null,
+    "nbre_d'établissements": null,
     "concerned_establishment": {
-      "nom": "null",
-      "nbre_de_salariés": "null",
-      "addresse": "null",
-      "activité": "null",
-      "ape_code": "null",
-      "date_implantation": "null",
-      "nbre_adhérents":"null",
+      "nom": null,
+      "nbre_de_salariés": null,
+      "addresse": null,
+      "activité": null,
+      "ape_code": null,
+      "date_implantation": null,
+      "nbre_adhérents":null,
       "existence_case": {
-        "DS":"True | False | null",
+        "DS": "True | False | null",
         "DP":"True | False | null",
         "CE":"True | False | null"
       },
-      "election_results_en pourcents": {
-        "CFDT": "null",
-        "CGT": "null",
-        "FO": "null",
-        "CFTC": "null",
-        "CGC": "null",
-        "DIV": "null"
+      "election_results_en_pourcents": {
+        "CFDT": null,
+        "CGT": null,
+        "FO": null,
+        "CFTC": null,
+        "CGC": null,
+        "DIV": null
       }
     }
   },
 
   "partie_réservée_champ": {
-    "avis_region": "null",
-    "avis_fédération": "null",
-    "avis_du_service": "null",
+    "avis_region": null,
+    "avis_fédération": null,
+    "avis_du_service": null,
     "décision_CNAS_case": {
-      "date": "null",
+      "date": null,
       "droit_syndical": "True | False",
       "fonds_tactique": "True | False",
       "fonds_solidarité": "True | False",
@@ -117,11 +118,12 @@ Return a structured JSON following this schema:
   },
 
   "metadata": {
-    "document_type": "",
-    "confidence_score": "",
-    "confidence_explanation":"null"
+    "document_type": 11,
+    "confidence_score": null,
+    "confidence_explanation":null
   }
 }
+
 ```
 
 Result Format:
@@ -142,5 +144,3 @@ Confidence Estimation:
 At the end, populate the “metadata” field with a "confidence_score", estimating how reliably the document was transcribed.
 
 Here’s the document :
-
-document type 11
