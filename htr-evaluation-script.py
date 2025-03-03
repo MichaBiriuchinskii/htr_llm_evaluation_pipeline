@@ -24,12 +24,33 @@ def flatten_json(obj: Dict, prefix: str = '') -> Dict:
 def normalize_value(value: Any) -> str:
     """
     Normalize values for comparison.
-    # Input: " John Doe  " or 123 or None
-    # Output: "John Doe" or "123" or ""
+    
+    Handles:
+    - None values
+    - String representation of None like "null", "None", "-"
+    - Whitespace
     """
     if value is None:
         return ""
-    return str(value).strip()
+    
+    value_str = str(value).strip().lower()
+    
+    if value_str in ["null", "none", "-", "nan"]:
+        return ""
+    
+    return value_str
+
+def is_null_value(value: Any) -> bool:
+    """
+    Check if a value should be considered as null/none.
+    """
+    if value is None:
+        return True
+    
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        return normalized in ["null", "none", "-", "nan", ""]
+
 
 def compute_string_similarity(str1: str, str2: str) -> float:
     """
@@ -106,12 +127,21 @@ def normalize_field(field: str, value: Any) -> str:
     return value_str
 
 def categorize_error(gold_value: Any, pred_value: Any, field: str) -> Tuple[str, float]:
-    """Categorize the error type and assign a scores"""
+    """Categorize the error type and assign a score"""
+    
+    # Special handling for null values
+    gold_is_null = is_null_value(gold_value)
+    pred_is_null = is_null_value(pred_value)
+    if gold_is_null and pred_is_null:
+        return "perfect", 1.0
+    if gold_is_null != pred_is_null:
+        return "critical", 0.0
+    
+    # For normal fields using string similarity
     gold_norm = normalize_field(field, gold_value)
     pred_norm = normalize_field(field, pred_value)
     if gold_norm == pred_norm:
         return "perfect", 1.0
-    # For normal fields using string similarity
     similarity = compute_string_similarity(str(gold_value), str(pred_value))
     if similarity >= 0.9:
         return "minor", 0.8
@@ -119,6 +149,7 @@ def categorize_error(gold_value: Any, pred_value: Any, field: str) -> Tuple[str,
         return "semantic", 0.5
     else:
         return "critical", 0.0
+
 
 def get_field_weight(field: str) -> float:
     """
@@ -147,11 +178,16 @@ def evaluate_documents(gold_path: str, pred_path: str) -> Dict:
     flat_gold = flatten_json(gold_json)
     flat_pred = flatten_json(pred_json)
     
-    # Filter out metadata fields
+    normalized_flat_pred = {}
+    for key, value in flat_pred.items():
+        normalized_key = key.replace(' ', '_')
+        normalized_flat_pred[normalized_key] = value
+
+    flat_pred = normalized_flat_pred
+    
     filtered_gold = {k: v for k, v in flat_gold.items() if not k.startswith('metadata')}
     filtered_pred = {k: v for k, v in flat_pred.items() if not k.startswith('metadata')}
 
-    # Prepare results structure
     results = {
         "total_score": 0.0,
         "total_weight": 0.0,
@@ -167,38 +203,45 @@ def evaluate_documents(gold_path: str, pred_path: str) -> Dict:
         "detailed_errors": []
     }
     
-    # Check for missing fields
     for field in filtered_gold:
         if field not in filtered_pred:
-            results["missing_fields"].append(field)
-            results["error_categories"]["critical"] += 1
-            results["detailed_errors"].append({
-                "field": field,
-                "gold": filtered_gold[field],
-                "pred": None,
-                "type": "critical",
-                "score": 0.0
-            })
+            if not is_null_value(filtered_gold[field]):
+                results["missing_fields"].append(field)
+                results["error_categories"]["critical"] += 1
+                results["detailed_errors"].append({
+                    "field": field,
+                    "gold": filtered_gold[field],
+                    "pred": None,
+                    "type": "critical",
+                    "score": 0.0
+                })
     
-    # Check for extra fields
     for field in filtered_pred:
         if field not in filtered_gold:
-            results["extra_fields"].append(field)
+            if not is_null_value(filtered_pred[field]):
+                results["extra_fields"].append(field)
     
-    # Compare common fields
     for field in filtered_gold:
         if field in filtered_pred:
             gold_value = filtered_gold[field]
             pred_value = filtered_pred[field]
             
-            # Get field weight
+            if is_null_value(gold_value) and is_null_value(pred_value):
+                results["error_categories"]["perfect"] += 1
+                results["field_scores"][field] = {
+                    "gold": gold_value,
+                    "pred": pred_value,
+                    "score": 1.0,
+                    "error_type": "perfect",
+                    "weight": 1.0  # minimal weight for null-null matches
+                }
+                continue
+            
             weight = get_field_weight(field)
             results["total_weight"] += weight
             
-            # Categorize error and get score
             error_type, score = categorize_error(gold_value, pred_value, field)
             
-            # Update results
             results["field_scores"][field] = {
                 "gold": gold_value,
                 "pred": pred_value,
@@ -210,7 +253,6 @@ def evaluate_documents(gold_path: str, pred_path: str) -> Dict:
             results["error_categories"][error_type] += 1
             results["total_score"] += weight * score
             
-            # Add to detailed errors if not perfect
             if error_type != "perfect":
                 results["detailed_errors"].append({
                     "field": field,
@@ -249,6 +291,7 @@ def evaluate_documents(gold_path: str, pred_path: str) -> Dict:
     )
     
     return results
+
 
 def export_results_to_json(results: Dict, output_path: str) -> None:
     """Export evaluation results to JSON file."""
@@ -498,8 +541,8 @@ export default Dashboard;
     # Path to the HTML file
     html_path = os.path.join(output_dir, "index.html")
     
-    print(f"\nDashboard files created in {output_dir}")
-    print("To view the dashboard, run the following commands:")
+    print(f"Dashboard files created in {output_dir}")
+    print("\nTo view the dashboard, run the following commands:")
     print(f"cd {output_dir}")
     print("npm install")
     print("npm start")
@@ -568,7 +611,8 @@ def main():
     # Serve the dashboard if requested
     if args.serve:
         open_dashboard_with_simple_server(dashboard_dir)
-    
+
+    print("\n")
     print(f"Evaluation results saved to: {output_json}")
     print(f"Dashboard saved to: {dashboard_dir}")
 
