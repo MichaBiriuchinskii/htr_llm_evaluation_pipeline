@@ -3,7 +3,7 @@ import os
 import argparse
 import re
 from typing import Dict, Tuple, Any
-import webbrowser
+import subprocess
 
 def flatten_json(obj: Dict, prefix: str = '') -> Dict:
     """
@@ -327,262 +327,24 @@ def print_summary(results: Dict) -> None:
     
     print("="*50)
 
-def generate_dashboard(results_path: str, output_dir: str) -> str:
+def launch_dashboard(dashboard_dir: str, results_path: str) -> None:
     """
-    Generate the React dashboard based on evaluation results.
-    Returns the path to the HTML file.
+    Launch the dashboard by calling the Node.js script
     """
-
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Create necessary files for the React app
-    # 1. Create package.json
-    package_json = {
-        "name": "htr-evaluation-dashboard",
-        "version": "1.0.0",
-        "description": "Dashboard for HTR evaluation results",
-        "main": "index.js",
-        "scripts": {
-            "start": "parcel index.html",
-            "build": "parcel build index.html"
-        },
-        "dependencies": {
-            "react": "^17.0.2",
-            "react-dom": "^17.0.2"
-        },
-        "devDependencies": {
-            "parcel": "^2.0.1"
-        }
-    }
-    
-    with open(os.path.join(output_dir, "package.json"), "w") as f:
-        json.dump(package_json, f, indent=2)
-    
-    # 2. Create index.html
-    index_html = """<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTR Evaluation Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body>
-    <div id="root"></div>
-    <script type="module" src="./index.js"></script>
-</body>
-</html>
-"""
-    
-    with open(os.path.join(output_dir, "index.html"), "w") as f:
-        f.write(index_html)
-    
-    # 3. Create index.js
-    index_js = """import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-
-ReactDOM.render(<App />, document.getElementById('root'));
-"""
-    
-    with open(os.path.join(output_dir, "index.js"), "w") as f:
-        f.write(index_js)
-    
-    # 4. Create App.js with the dashboard component
-    app_js = """import React from 'react';
-import Dashboard from './Dashboard';
-import results from './results.json';
-
-const App = () => {
-    return <Dashboard results={results} />;
-};
-
-export default App;
-"""
-    
-    with open(os.path.join(output_dir, "App.js"), "w") as f:
-        f.write(app_js)
-    
-    # 5. Copy results.json to the output directory
-    import shutil
-    shutil.copy(results_path, os.path.join(output_dir, "results.json"))
-    
-    # 6. Create Dashboard.js component
-    dashboard_js = """import React from 'react';
-
-const Dashboard = ({ results }) => {
-  // Color coding for scores
-  const getScoreColor = (score) => {
-    if (score >= 90) return 'bg-green-500 text-white';
-    if (score >= 75) return 'bg-yellow-500 text-white';
-    if (score >= 60) return 'bg-orange-500 text-white';
-    return 'bg-red-500 text-white';
-  };
-
-  // Color coding for error types
-  const getErrorTypeColor = (type) => {
-    switch(type) {
-      case 'critical': return 'bg-red-100 text-red-800';
-      case 'semantic': return 'bg-yellow-100 text-yellow-800';
-      case 'minor': return 'bg-blue-100 text-blue-800';
-      case 'perfect': return 'bg-green-100 text-green-800';
-      default: return '';
-    }
-  };
-
-  return (
-    <div className="p-4 max-w-5xl mx-auto bg-white rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-6">HTR Evaluation Dashboard</h1>
-      
-      {/* Key Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gray-100 p-4 rounded-lg text-center">
-          <p className="text-gray-500 text-sm">Overall Score</p>
-          <div className={`text-2xl font-bold my-2 py-2 rounded ${getScoreColor(results.final_score)}`}>
-            {results.final_score.toFixed(1)}%
-          </div>
-        </div>
-        
-        <div className="bg-gray-100 p-4 rounded-lg text-center">
-          <p className="text-gray-500 text-sm">Field Coverage</p>
-          <div className={`text-2xl font-bold my-2 py-2 rounded ${getScoreColor(results.field_coverage)}`}>
-            {results.field_coverage.toFixed(1)}%
-          </div>
-        </div>
-        
-        <div className="bg-gray-100 p-4 rounded-lg text-center">
-          <p className="text-gray-500 text-sm">Critical Errors</p>
-          <div className="text-2xl font-bold my-2 py-2 rounded bg-red-100 text-red-800">
-            {results.error_categories.critical}%
-          </div>
-        </div>
-        
-        <div className="bg-gray-100 p-4 rounded-lg text-center">
-          <p className="text-gray-500 text-sm">Perfect Matches</p>
-          <div className="text-2xl font-bold my-2 py-2 rounded bg-green-100 text-green-800">
-            {results.error_categories.perfect}%
-          </div>
-        </div>
-      </div>
-      
-      {/* Error Distribution */}
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-3">Error Distribution</h2>
-        <div className="h-8 w-full rounded-lg overflow-hidden flex">
-          <div 
-            className="bg-red-500 h-full" 
-            style={{width: `${results.error_categories.critical}%`}}
-            title={`Critical: ${results.error_categories.critical}%`}
-          ></div>
-          <div 
-            className="bg-yellow-500 h-full" 
-            style={{width: `${results.error_categories.semantic}%`}}
-            title={`Semantic: ${results.error_categories.semantic}%`}
-          ></div>
-          <div 
-            className="bg-blue-400 h-full" 
-            style={{width: `${results.error_categories.minor}%`}}
-            title={`Minor: ${results.error_categories.minor}%`}
-          ></div>
-          <div 
-            className="bg-green-500 h-full" 
-            style={{width: `${results.error_categories.perfect}%`}}
-            title={`Perfect: ${results.error_categories.perfect}%`}
-          ></div>
-        </div>
-        <div className="flex text-xs mt-1 text-gray-600 justify-between">
-          <span>Critical ({results.error_categories.critical}%)</span>
-          <span>Semantic ({results.error_categories.semantic}%)</span>
-          <span>Minor ({results.error_categories.minor}%)</span>
-          <span>Perfect ({results.error_categories.perfect}%)</span>
-        </div>
-      </div>
-      
-      {/* Top Errors Table */}
-      <div>
-        <h2 className="text-xl font-semibold mb-3">All Errors ({results.detailed_errors.length})</h2>
-        <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-            <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Field</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gold Standard</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">HTR Output</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Error Type</th>
-            </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-            {results.detailed_errors.map((error, index) => (
-                <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{error.field}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{String(error.gold)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{String(error.pred || '-')}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getErrorTypeColor(error.type)}`}>
-                      {error.type.charAt(0).toUpperCase() + error.type.slice(1)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Dashboard;
-"""
-    
-    with open(os.path.join(output_dir, "Dashboard.js"), "w") as f:
-        f.write(dashboard_js)
-    
-    # Path to the HTML file
-    html_path = os.path.join(output_dir, "index.html")
-    
-    print(f"Dashboard files created in {output_dir}")
-    
-    return html_path
-
-def launch_dashboard(dashboard_dir: str) -> None:
-    """
-    Launch the dashboard using npm start without attempting to open a browser.
-    Simply provides clear instructions for accessing it.
-    """
-    import subprocess
-    import os
-    
-    # Change to the dashboard directory
-    original_dir = os.getcwd()
-    os.chdir(dashboard_dir)
-    
-    print(f"\nSetting up and launching dashboard from {dashboard_dir}")
-    
     try:
-        # Run npm install first
-        print("Installing dependencies (npm install)...")
-        subprocess.run(["npm", "install"], check=True)
+        # Run the Node.js dashboard script
+        print(f"\nLaunching dashboard for {results_path}...")
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        dashboard_script = os.path.join(script_dir, "dashboard_generator.js")
         
-        # Display access instructions before starting the server
-        print("\n" + "="*60)
-        print("DASHBOARD ACCESS INSTRUCTIONS:")
-        print("="*60)
-        print("Once the server starts:")
-        print("1. Open your web browser")
-        print("2. Navigate to: http://localhost:1234")
-        print("="*60)
-        print("\nPress Ctrl+C to stop the server when done.")
-        
-        print("\nStarting Parcel development server (npm start)...")
-        subprocess.run(["npm", "start"], check=True)
+        cmd = ["node", dashboard_script, results_path, dashboard_dir]
+        subprocess.run(cmd, check=True)
         
     except subprocess.CalledProcessError as e:
-        print(f"Error running npm commands: {e}")
-    except KeyboardInterrupt:
-        print("\nServer stopped by user.")
-    finally:
-        os.chdir(original_dir)
+        print(f"Error launching dashboard: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+
 
 
 def main():
@@ -597,13 +359,14 @@ def main():
     pred_filename = os.path.splitext(os.path.basename(args.pred_path))[0]
     output_json = os.path.join(args.output_dir, f"{pred_filename}_evaluation_results.json")
     dashboard_dir = os.path.join(args.output_dir, f"{pred_filename}_dashboard")
+    
     os.makedirs(args.output_dir, exist_ok=True)
+    
     results = evaluate_documents(args.gold_path, args.pred_path)
     print_summary(results)
     export_results_to_json(results, output_json)
     
-    generate_dashboard(output_json, dashboard_dir)
-    launch_dashboard(dashboard_dir)
+    launch_dashboard(dashboard_dir, output_json)
     
     print(f"\nEvaluation results saved to: {output_json}")
     print(f"Dashboard saved to: {dashboard_dir}")
