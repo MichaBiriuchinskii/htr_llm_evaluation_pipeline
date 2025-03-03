@@ -1,155 +1,169 @@
-# HTR Evaluation System - Setup and Usage Guide
+# HTR Evaluation System
 
-This system evaluates and visualizes the accuracy of HTR (Handwritten Text Recognition) JSON outputs compared to gold standard documents. It includes a Python evaluation script and a React dashboard for visualizing results.
+A system for evaluating and visualizing the accuracy of HTR (Handwritten Text Recognition) JSON outputs compared to gold standard legal documents. It was developed specifically for cases when legal documents can be categorized according to types that follow the same structure, which can be defined and extracted using vision-enhanced LLMs.
 
 ## System Requirements
 
 - Python 3.6+
-- Node.js and npm (for the dashboard)
-- Required Python packages: `json`, `difflib`, `numpy`, `pandas`
+- Node.js 14+ and npm 6+ (for dashboard visualization)
+- Internet connection (for npm package installation)
 
 ## Installation
 
-1. Créer et activer l'environnement virtuel.
-```python
-python -m venv htr_llm_env
-source bin/activate/htr_llm_env
-```
+### 1. Set Up Python Environment
 
-2. Install required Python packages:
+First, make sure Python 3.6+ is installed:
 ```bash
-pip install numpy pandas
+python --version
+# or
+python3 --version
 ```
 
-3. For the dashboard visualization, you'll need Node.js and npm:
-- Download and install from [nodejs.org](https://nodejs.org/)
+Clone this repository (or download and extract the ZIP file):
+```bash
+git clone https://github.com/username/htr-evaluation-system.git
+cd htr-evaluation-system
+```
+
+Create and activate a virtual environment:
+
+**Linux/macOS**:
+```bash
+python -m venv htr_llm_env
+source htr_llm_env/bin/activate
+```
+
+**Windows**:
+```bash
+python -m venv htr_llm_env
+htr_llm_env\Scripts\activate
+```
+
+### 2. Install Required Python Packages
+
+```bash
+# Core requirements
+pip install -U pip
+pip install json re argparse typing
+```
+
+### 3. Install Node.js and npm
+
+The dashboard requires Node.js and npm. Install them if you don't have them already:
+
+**Option 1**: Download and install from [nodejs.org](https://nodejs.org/)
+
+**Option 2**: Using package managers:
+
+**Linux** (Ubuntu/Debian):
+```bash
+sudo apt update
+sudo apt install nodejs npm
+```
+
+**macOS** (with Homebrew):
+```bash
+brew install node
+```
+
+Verify the installation:
+```bash
+node --version
+npm --version
+```
+
+### 4. Test the Installation
+
+Run a simple test to ensure everything is set up correctly:
+```bash
+python -c "import json, re, argparse, os; print('All required packages are installed!')"
+```
 
 ## Usage
 
-### Basic Evaluation
-
-Run the evaluation script with your gold standard and predicted JSON files:
+### Basic Usage
 
 ```bash
-python htr_evaluation.py path/to/gold_standard.json path/to/predicted.json
+python htr_evaluation.py exemple_data/mock-llm-json.json exemple_data/mock-gold-json.json
 ```
 
 This will:
-1. Evaluate the predicted document against the gold standard
-2. Print a summary of the evaluation results
-3. Save detailed results to `evaluation_results.json`
-4. Generate dashboard files in a `dashboard` directory
+1. Evaluate the predicted JSON against the gold standard
+2. Generate a dashboard in the default output directory (`./output/`)
+3. Launch the dashboard viewer automatically
 
-### Command Line Options
-
-```
-python htr_evaluation.py gold_file.json predicted_file.json [options]
-
-Options:
-  --output OUTPUT    Path to save evaluation results (default: evaluation_results.json)
-  --dashboard DIR    Directory to save dashboard files (default: dashboard)
-  --serve            Start a simple HTTP server to view the dashboard
-```
-
-### Viewing the Dashboard
-
-#### Option 1: Using the built-in server
-
-Run with the `--serve` option to automatically launch a simple HTTP server:
+### Options
 
 ```bash
-python htr_evaluation.py gold_file.json predicted_file.json --serve
+python htr_evaluation.py exemple_data/mock-llm-json.json exemple_data/mock-gold-json.json --output_dir /custom/path
 ```
 
-This will:
-1. Generate the dashboard files
-2. Start a local HTTP server on port 8000
-3. Open your default browser to view the dashboard
+- `--output_dir`: Custom directory to save evaluation results (default: ./output/)
 
-#### Option 2: Manual setup (for customization)
+## Features
 
-1. Generate the dashboard files:
-```bash
-python htr_evaluation.py gold_file.json predicted_file.json
-```
+### Evaluation Process
 
-2. Navigate to the dashboard directory:
-```bash
-cd dashboard
-```
-
-3. Install dependencies:
-```bash
-npm install
-```
-
-4. Start the development server:
-```bash
-npm start
-```
-
-5. Open your browser to view the dashboard (typically at http://localhost:1234)
-
-## Dashboard Features
-
-The dashboard provides:
-
-- Overall evaluation score
-- Field coverage percentage
-- Error distribution visualization
-- Detailed examples of errors categorized by type:
-  - Critical errors (completely incorrect)
-  - Semantic differences (different wording, same meaning)
-  - Minor errors (small formatting differences)
-  - Perfect matches
-
-## Evaluation Methodology
-
-The system uses a weighted scoring approach that:
-
+The system:
 1. Flattens nested JSON structures for comparison
-2. Applies field-specific normalization (phone numbers, dates, etc.)
-3. Computes string similarity using Levenshtein distance
-4. Categorizes errors based on similarity thresholds
-5. Weights fields by importance (names, IDs, etc. have higher weights)
-6. Calculates final score as weighted average
+2. Normalizes field names by replacing spaces with underscores
+3. Applies field-specific normalization:
+   - Phone numbers: Removes non-digit characters
+   - Numeric fields: Extracts digits
+   - Dates: Extracts numeric components
+4. Computes string similarity using Levenshtein distance
+5. Weights fields based on importance (adjustable for each specific evaluation campaign)
+6. Categorizes errors into four types
 
 ### Error Categories
 
 - **Critical Error (0%)**: Completely incorrect or missing values
-- **Semantic Difference (50%)**: Different representation but similar meaning
-- **Minor Error (80%)**: Small formatting differences
+- **Semantic Difference (50%)**: Similar meaning but significant differences
+- **Minor Error (80%)**: Small differences
 - **Perfect Match (100%)**: Exact match after normalization
 
-## Example
+### Dashboard Features
 
-Evaluating `gold_CFDT.json` against `Claude_CFDT.json`:
+- Overall evaluation score
+- Field coverage percentage
+- Error distribution visualization
+- Detailed table of all errors
 
-```bash
-python htr_evaluation.py gold_CFDT.json Claude_CFDT.json --serve
-```
+## How It Works
 
-The dashboard will show metrics like:
-- Overall accuracy score
-- Field coverage
-- Distribution of error types
-- Examples of the most significant errors
+After running the evaluation, the script will:
+1. Generate the dashboard files
+2. Install npm dependencies
+3. Start the Parcel development server
+4. Display access instructions
+
+Open your browser and navigate to http://localhost:1234 to view the dashboard.
 
 ## Customization
 
-You can modify the script to:
-- Adjust similarity thresholds in `categorize_error()`
-- Change field weights in `get_field_weight()`
-- Add custom normalization rules in `normalize_field()`
-- Modify the dashboard design in the `Dashboard.js` file
+You can modify:
+- Similarity thresholds in `categorize_error()`
+- Field weights in `get_field_weight()`
+- Field normalization in `normalize_field()`
 
 ## Troubleshooting
 
-**Problem**: Dashboard doesn't render properly
-**Solution**: Make sure you have all dependencies installed with `npm install`
+### Common Issues
 
-**Problem**: Script fails to parse JSON files
-**Solution**: Verify that your JSON files are properly formatted
+**Problem**: `ModuleNotFoundError: No module named 'xyz'`  
+**Solution**: Install the missing package: `pip install xyz`
 
-**Problem**: Error running the HTTP server
-**Solution**: Make sure port 8000 is available, or modify the `PORT` variable in the script
+**Problem**: Dashboard doesn't launch  
+**Solution**: 
+1. Make sure Node.js and npm are installed correctly
+2. Manually navigate to the dashboard directory and run:
+```bash
+cd output/[file_name]_dashboard
+npm install
+npm start
+```
+3. Open your browser to http://localhost:1234
+
+## Legal
+
+This code is distributed under the CC BY-NC-SA 4.0 license, developed by Mikhail Biriuchinskii, NLP Engineer at [ObTIC](https://obtic.sorbonne-universite.fr/), Sorbonne University.
