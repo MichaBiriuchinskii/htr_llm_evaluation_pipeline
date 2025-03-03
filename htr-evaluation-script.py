@@ -542,39 +542,48 @@ export default Dashboard;
     html_path = os.path.join(output_dir, "index.html")
     
     print(f"Dashboard files created in {output_dir}")
-    print("\nTo view the dashboard, run the following commands:")
-    print(f"cd {output_dir}")
-    print("npm install")
-    print("npm start")
     
     return html_path
 
-def open_dashboard_with_simple_server(output_dir: str) -> None:
-    """Open the dashboard using a simple HTTP server."""
-    import http.server
-    import socketserver
-    import threading
+def launch_dashboard(dashboard_dir: str) -> None:
+    """
+    Launch the dashboard using npm start without attempting to open a browser.
+    Simply provides clear instructions for accessing it.
+    """
+    import subprocess
+    import os
     
-    PORT = 8000
+    # Change to the dashboard directory
+    original_dir = os.getcwd()
+    os.chdir(dashboard_dir)
     
-    # Change directory to the output directory
-    os.chdir(output_dir)
+    print(f"\nSetting up and launching dashboard from {dashboard_dir}")
     
-    Handler = http.server.SimpleHTTPRequestHandler
-    
-    # Create server
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print(f"\nStarting simple HTTP server at http://localhost:{PORT}")
-        print("Press Ctrl+C to stop the server.")
+    try:
+        # Run npm install first
+        print("Installing dependencies (npm install)...")
+        subprocess.run(["npm", "install"], check=True)
         
-        # Open the browser
-        webbrowser.open(f"http://localhost:{PORT}")
+        # Display access instructions before starting the server
+        print("\n" + "="*60)
+        print("DASHBOARD ACCESS INSTRUCTIONS:")
+        print("="*60)
+        print("Once the server starts:")
+        print("1. Open your web browser")
+        print("2. Navigate to: http://localhost:1234")
+        print("="*60)
+        print("\nPress Ctrl+C to stop the server when done.")
         
-        # Start the server
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            print("\nServer stopped.")
+        print("\nStarting Parcel development server (npm start)...")
+        subprocess.run(["npm", "start"], check=True)
+        
+    except subprocess.CalledProcessError as e:
+        print(f"Error running npm commands: {e}")
+    except KeyboardInterrupt:
+        print("\nServer stopped by user.")
+    finally:
+        os.chdir(original_dir)
+
 
 def main():
     """Main function to run the evaluation script."""
@@ -582,38 +591,21 @@ def main():
     parser.add_argument('gold_path', help='Path to the gold standard JSON file')
     parser.add_argument('pred_path', help='Path to the predicted JSON file')
     parser.add_argument('--output_dir', help='Directory to save the evaluation results', default='./output/')
-    parser.add_argument('--serve', action='store_true', help='Serve the dashboard using a simple HTTP server')
     
     args = parser.parse_args()
     
-    # Extract base name from the predicted file (without extension)
     pred_filename = os.path.splitext(os.path.basename(args.pred_path))[0]
-    
-    # Define dynamic output paths
     output_json = os.path.join(args.output_dir, f"{pred_filename}_evaluation_results.json")
     dashboard_dir = os.path.join(args.output_dir, f"{pred_filename}_dashboard")
-    
-    # Ensure output directory exists
     os.makedirs(args.output_dir, exist_ok=True)
-    
-    # Evaluate the documents
     results = evaluate_documents(args.gold_path, args.pred_path)
-    
-    # Print summary
     print_summary(results)
-    
-    # Export results to JSON
     export_results_to_json(results, output_json)
     
-    # Generate dashboard
-    dashboard_path = generate_dashboard(output_json, dashboard_dir)
+    generate_dashboard(output_json, dashboard_dir)
+    launch_dashboard(dashboard_dir)
     
-    # Serve the dashboard if requested
-    if args.serve:
-        open_dashboard_with_simple_server(dashboard_dir)
-
-    print("\n")
-    print(f"Evaluation results saved to: {output_json}")
+    print(f"\nEvaluation results saved to: {output_json}")
     print(f"Dashboard saved to: {dashboard_dir}")
 
 if __name__ == "__main__":
