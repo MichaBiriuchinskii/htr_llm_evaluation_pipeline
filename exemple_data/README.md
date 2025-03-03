@@ -32,7 +32,7 @@ A simulated HTR output from Claude, containing several typical recognition error
 Run the evaluation script with these examples to see how the system handles different types of errors:
 
 ```bash
-python ../htr-evaluation-script.py mock_gold.json mock_claude.json --dashboard example_dashboard --serve
+python ../htr-evaluation-script.py mock_gold.json mock_claude.json 
 ```
 
 This will generate a detailed report showing:
