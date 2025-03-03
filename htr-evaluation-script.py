@@ -538,14 +538,20 @@ def main():
     parser = argparse.ArgumentParser(description='Evaluate HTR document against gold standard.')
     parser.add_argument('gold_path', help='Path to the gold standard JSON file')
     parser.add_argument('pred_path', help='Path to the predicted JSON file')
-    parser.add_argument('--output', help='Path to save the evaluation results', default='./output/evaluation_results.json')
-    parser.add_argument('--dashboard', help='Path to save the dashboard files', default='./output/dashboard')
+    parser.add_argument('--output_dir', help='Directory to save the evaluation results', default='./output/')
     parser.add_argument('--serve', action='store_true', help='Serve the dashboard using a simple HTTP server')
     
     args = parser.parse_args()
     
+    # Extract base name from the predicted file (without extension)
+    pred_filename = os.path.splitext(os.path.basename(args.pred_path))[0]
+    
+    # Define dynamic output paths
+    output_json = os.path.join(args.output_dir, f"{pred_filename}_evaluation_results.json")
+    dashboard_dir = os.path.join(args.output_dir, f"{pred_filename}_dashboard")
+    
     # Ensure output directory exists
-    os.makedirs(os.path.dirname(args.output), exist_ok=True)
+    os.makedirs(args.output_dir, exist_ok=True)
     
     # Evaluate the documents
     results = evaluate_documents(args.gold_path, args.pred_path)
@@ -554,14 +560,17 @@ def main():
     print_summary(results)
     
     # Export results to JSON
-    export_results_to_json(results, args.output)
+    export_results_to_json(results, output_json)
     
     # Generate dashboard
-    dashboard_path = generate_dashboard(args.output, args.dashboard)
+    dashboard_path = generate_dashboard(output_json, dashboard_dir)
     
     # Serve the dashboard if requested
     if args.serve:
-        open_dashboard_with_simple_server(args.dashboard)
+        open_dashboard_with_simple_server(dashboard_dir)
+    
+    print(f"Evaluation results saved to: {output_json}")
+    print(f"Dashboard saved to: {dashboard_dir}")
 
 if __name__ == "__main__":
     main()

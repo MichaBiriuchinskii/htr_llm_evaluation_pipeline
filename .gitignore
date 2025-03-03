@@ -1,3 +1,6 @@
-/output/exemple_output/dashboard/
+/output/
 /data/
 .DS_Store
+
+# Allow for demonstration purposes 
+!/output/exemple_output/results.json
