@@ -104,6 +104,105 @@ Return a structured JSON following this schema:
   },
 
   "partie_réservée_champ": {
+    {
+  "header": {
+    "title": null
+  },
+
+  "syndicat_champ": {
+    "nom":null,
+    "addresse_info": null,
+    "contacte": {
+      "matricule_confédéral": null,
+      "tel": null
+    },
+    "correspondant_dossier": {
+      "nom": null,
+      "address": null,
+      "tel": null
+    }
+  },
+
+  "objet_litige": {
+    "sujet": null,
+    "dossier_victime_case": {
+      "existe": "[SELECT ONE: oui/non/null]",
+      "numero_dossier": null
+    }
+  },
+
+  "parties_procès_champ": {
+    "coté_cfdt": {
+      "syndicate_case": "[SELECT ONE: oui/non/null]",
+      "militant_case": "[SELECT ONE: oui/non/null]",
+      "nom_mandat_militant": null,
+      "autres_parties": null,
+      "adversaire": null,
+      "initiative_case": "[SELECT ONE: CFDT/Adversaire/null]",
+      "défense_CFGT_case": "[SELECT ONE: Avocat/Défenseur syndical/null]",
+      "nom": null,
+      "adresse": null,
+      "Tél": null
+    }
+  },
+
+  "décisions_antérieures_champ": {
+    "décisions_patronales": null,
+    "décisions_administratives": null,
+    "jugements": null,
+    "tribunaux": null
+  },
+
+  "entreprise_champ": {
+    "nom": null,
+    "nbre_de_salariés": null,
+    "nbre_d'établissements": null,
+    "établissement_concerné": {
+      "nom": null,
+      "nbre_de_salariés": null,
+      "addresse": null,
+      "activité": null,
+      "ape_code": null,
+      "date_implantation": null,
+      "nbre_adhérents":null,
+      "existence_case": {
+        "DS":"[SELECT ONE: True/False/null]",
+        "DP":"[SELECT ONE: True/False/null]",
+        "CE":"[SELECT ONE: True/False/null]"
+      },
+      "election_results_en_pourcents": {
+        "CFDT": null,
+        "CGT": null,
+        "FO": null,
+        "CFTC": null,
+        "CGC": null,
+        "DIV": null
+      }
+    }
+  },
+
+  "partie_réservée_champ": {
+    "numéro_de_dossier":null,
+    "avis_region": null,
+    "avis_fédération": null,
+    "avis_du_service": null,
+    "décision_CNAS_case": {
+      "date": null,
+      "droit_syndical": "[SELECT ONE: True/False]",
+      "fonds_tactique": "[SELECT ONE: True/False]",
+      "fonds_solidarité": "[SELECT ONE: True/False]",
+      "rejet": "[SELECT ONE: True/False]",
+      "sans_suite": "[SELECT ONE: True/False]"
+    }
+  },
+
+  "metadata": {
+    "document_type": null,
+    "confidence_score": null,
+    "confidence_explanation":null
+  }
+}
+
     "avis_region": null,
     "avis_fédération": null,
     "avis_du_service": null,
