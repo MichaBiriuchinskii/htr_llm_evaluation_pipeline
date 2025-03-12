@@ -84,7 +84,7 @@ python -c "import json, re, argparse, os; print('All required packages are insta
 ### Basic Usage
 
 ```bash
-python htr_evaluation.py exemple_data/mock-llm-json.json exemple_data/mock-gold-json.json
+python htr_evaluation.py exemple_data/mock-gold-json.json exemple_data/mock-llm-json.json
 ```
 
 This will:
@@ -95,7 +95,7 @@ This will:
 ### Options
 
 ```bash
-python htr_evaluation.py exemple_data/mock-llm-json.json exemple_data/mock-gold-json.json --output_dir /custom/path
+python htr_evaluation.py exemple_data/mock-gold-json.json exemple_data/mock-llm-json.json --output_dir /custom/path
 ```
 
 - `--output_dir`: Custom directory to save evaluation results (default: ./output/)
